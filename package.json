@@ -2,7 +2,7 @@
   "name": "swanlab",
   "icon": "resources/icon.png",
   "displayName": "SwanLab",
-  "description": "LEAVE BLANK",
+  "description": "SwanLab official VSCode extension, tracking and visualizing your entire machine learning process.",
   "version": "1.0.0",
   "engines": {
     "vscode": "^1.94.0"
@@ -12,8 +12,8 @@
     "Other"
   ],
   "repository": {
-		"url": "https://github.com/SwanHubX/SwanLab-VSCode-Plugin"
-	},
+    "url": "https://github.com/SwanHubX/SwanLab-VSCode-Plugin"
+  },
   "license": "MIT",
   "activationEvents": [],
   "main": "./dist/extension.js",
@@ -22,6 +22,17 @@
       {
         "command": "swanlab.openWebview",
         "title": "Python: Launch SwanLab"
+      }
+    ],
+    "localizations": [
+      {
+        "languageId": "zh-cn",
+        "translations": [
+          {
+            "id": "SwanLab.swanlab",
+            "path": "./package.nls.zh-cn.json"
+          }
+        ]
       }
     ]
   },
@@ -51,5 +62,9 @@
     "eslint": "^9.11.1",
     "npm-run-all": "^4.1.5",
     "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "vscode-nls": "^5.2.0",
+    "vscode-nls-dev": "^4.0.4"
   }
 }
