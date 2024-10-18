@@ -3,7 +3,7 @@
   "icon": "resources/icon.png",
   "displayName": "SwanLab",
   "description": "LEAVE BLANK",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.94.0"
   },
