@@ -3,9 +3,9 @@
   "icon": "resources/icon.png",
   "displayName": "SwanLab",
   "description": "SwanLab official VSCode extension, tracking and visualizing your entire machine learning process.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "engines": {
-    "vscode": "^1.94.0"
+    "vscode": "^1.43.0"
   },
   "publisher": "SwanLab",
   "categories": [
@@ -53,7 +53,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.8",
     "@types/node": "~20.16.11",
-    "@types/vscode": "^1.94.0",
+    "@types/vscode": "^1.43.0",
     "@typescript-eslint/eslint-plugin": "^8.7.0",
     "@typescript-eslint/parser": "^8.7.0",
     "@vscode/test-cli": "^0.0.10",
