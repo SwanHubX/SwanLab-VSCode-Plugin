@@ -15,7 +15,7 @@
     "commands": [
       {
         "command": "swanlab.openWebview",
-        "title": "SwanLab"
+        "title": "Python: Launch SwanLab"
       }
     ]
   },
