@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { IDisposable } from './lifecycle';
 import * as path from 'path';
 
 // 当你的扩展被激活时调用此方法
