@@ -138,27 +138,128 @@ function getWebviewContent(url: string) {
                     height: 100%;
                     overflow: hidden;
                 }
+                #header {
+                    background-color: #333;
+                    color: #fff;
+                    padding: 5px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    transition: height 0.3s, padding 0.3s;
+                    overflow: hidden;
+                    height: 0;
+                    padding: 0;
+                }
+                #header.expanded {
+                    height: auto;
+                    padding: 5px;
+                }
+                #content {
+                    height: 100%;
+                    transition: height 0.3s;
+                }
+                #content.partial {
+                    height: calc(100% - 30px);
+                }
                 iframe {
                     width: 100%;
                     height: 100%;
                     border: none;
-                    transform: scale(0.9);
                     transform-origin: 0 0;
+                }
+                button {
+                    margin-left: 5px;
+                    font-size: 12px;
+                    padding: 2px 5px;
+                    cursor: pointer;
+                    background-color: #555;
+                    color: #fff;
+                    border: none;
+                    border-radius: 3px;
+                }
+                #toggleHeader {
+                    background-color: rgba(255, 255, 255, 0.1);
+                    border: none;
+                    padding: 5px;
+                    border-radius: 3px;
+                    position: fixed;
+                    top: 5px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 1000;
+                    transition: background-color 0.3s, color 0.3s;
+                    color: rgba(255, 255, 255, 0.5);
+                }
+                #toggleHeader:hover {
+                    background-color: rgba(255, 255, 255, 0.4);
+                    color: rgba(255, 255, 255, 1);
+                }
+                #toggleHeader.expanded {
+                    color: rgba(255, 255, 255, 0.7);
+                }
+                #toggleHeader.expanded:hover {
+                    color: rgba(255, 255, 255, 1);
                 }
             </style>
         </head>
         <body>
-            <iframe src="${url}" onload="checkIframeLoaded()" style="width: 111.11%; height: 111.11%;"></iframe>
+            <button id="toggleHeader" onclick="toggleHeader()" title="Toggle Header">Show Header</button>
+            <div id="header">
+                <div></div>
+                <div>
+                    <button onclick="zoomOut()" title="Zoom Out">-</button>
+                    <button onclick="zoomIn()" title="Zoom In">+</button>
+                    <button onclick="refreshIframe()" title="Refresh">↻</button>
+                </div>
+            </div>
+            <div id="content">
+                <iframe src="${url}" onload="checkIframeLoaded()" id="swanlab-iframe"></iframe>
+            </div>
             <script>
+                const vscode = acquireVsCodeApi();
+                const iframe = document.getElementById('swanlab-iframe');
+                const header = document.getElementById('header');
+                const content = document.getElementById('content');
+                const toggleButton = document.getElementById('toggleHeader');
+                let currentZoom = 0.9;
+                let isHeaderExpanded = false;
+
                 function checkIframeLoaded() {
-                    const iframe = document.querySelector('iframe');
                     vscode.postMessage({
                         command: 'info',
-                        text: "Loaded successfully",
+                        text: "Loaded successfully",        
                     });
                 }
-                // Declare vscode for TypeScript
-                const vscode = acquireVsCodeApi();
+
+                function changeZoom(zoomLevel) {
+                    currentZoom = zoomLevel;
+                    iframe.style.transform = \`scale(\${zoomLevel})\`;
+                    iframe.style.width = \`\${100 / zoomLevel}%\`;
+                    iframe.style.height = \`\${100 / zoomLevel}%\`;
+                }
+
+                function zoomIn() {
+                    changeZoom(currentZoom * 1.1);
+                }
+
+                function zoomOut() {
+                    changeZoom(currentZoom * 0.9);
+                }
+
+                function refreshIframe() {
+                    iframe.src = iframe.src;
+                }
+
+                function toggleHeader() {
+                    isHeaderExpanded = !isHeaderExpanded;
+                    header.classList.toggle('expanded', isHeaderExpanded);
+                    content.classList.toggle('partial', isHeaderExpanded);
+                    toggleButton.classList.toggle('expanded', isHeaderExpanded);
+                    toggleButton.textContent = isHeaderExpanded ? 'Hide Header' : 'Show Header';
+                }
+
+                // Initialize with 90% zoom
+                changeZoom(0.9);
             </script>
         </body>
         </html>
