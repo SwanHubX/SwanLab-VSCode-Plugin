@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import { IDisposable } from './lifecycle';
+import * as path from 'path';
 
 // 当你的扩展被激活时调用此方法
 export function activate(context: vscode.ExtensionContext) {
@@ -32,35 +34,35 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable);
 
     // 注册代码操作提供程序
-    const codeActionProvider = vscode.languages.registerCodeActionsProvider(
-        { scheme: 'file', language: 'python' },
-        new SwanLabCodeActionProvider()
-    );
-    // 将代码操作提供程序添加到上下文订阅中
+    const codeActionProvider = watchEditorsForSwanLabUsage();
     context.subscriptions.push(codeActionProvider);
+
+    // 立即开始监视编辑器
+    onChangedActiveTextEditor(vscode.window.activeTextEditor);
 }
 
-// SwanLab代码操作提供程序类
-class SwanLabCodeActionProvider implements vscode.CodeActionProvider {
-    // 提供代码操作的方法
-    provideCodeActions(document: vscode.TextDocument, range: vscode.Range): vscode.CodeAction[] {
-        // 获取当前行的文本
-        const lineText = document.lineAt(range.start.line).text;
-        // 如果当前行包含'import swanlab'
-        if (lineText.includes('import swanlab')) {
-            // 创建一个新的代码操作
-            const action = new vscode.CodeAction('启动 SwanLab', vscode.CodeActionKind.QuickFix);
-            // 设置代码操作的命令
-            action.command = {
-                command: 'swanlab.openWebview',
-                title: '启动 SwanLab',
-                tooltip: '打开 SwanLab 界面'
-            };
-            // 返回包含这个操作的数组
-            return [action];
+export function watchEditorsForSwanLabUsage(): IDisposable {
+    // Process currently active text editor
+    onChangedActiveTextEditor(vscode.window.activeTextEditor);
+    // Process changes to active text editor as well
+    return vscode.window.onDidChangeActiveTextEditor(onChangedActiveTextEditor);
+}
+
+function onChangedActiveTextEditor(editor: vscode.TextEditor | undefined): void {
+    if (!editor || !editor.document) {
+        return;
+    }
+    const { document } = editor;
+    const extName = path.extname(document.fileName).toLowerCase();
+    if (extName === '.py' || (extName === '.ipynb' && document.languageId === 'python')) {
+        for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber += 1) {
+            const line = document.lineAt(lineNumber);
+            if (line.text.includes('import swanlab')) {
+                // 触发效果
+                // 这里可以添加你想要的效果，例如显示提示或执行某些操作
+                vscode.window.showInformationMessage('检测到 SwanLab 导入');
+            }
         }
-        // 如果不包含'import swanlab'，返回空数组
-        return [];
     }
 }
 

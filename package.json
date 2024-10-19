@@ -15,7 +15,9 @@
     "url": "https://github.com/SwanHubX/SwanLab-VSCode-Plugin"
   },
   "license": "MIT",
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:python"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
