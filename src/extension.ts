@@ -30,46 +30,65 @@ export function activate(context: vscode.ExtensionContext) {
             openSwanLabWebsite(context);
         }
     });
-    // 将命令添加到上下文订阅中
     context.subscriptions.push(disposable);
 
-    // 注册代码操作提供程序
-    const codeActionProvider = watchEditorsForSwanLabUsage();
-    context.subscriptions.push(codeActionProvider);
+    // 全局注册 CodeLens 提供者
+    const codeLensProvider = vscode.languages.registerCodeLensProvider(
+        { scheme: 'file', language: 'python' },
+        new SwanLabCodeLensProvider()
+    );
+    context.subscriptions.push(codeLensProvider);
 
-    // 立即开始监视编辑器
-    onChangedActiveTextEditor(vscode.window.activeTextEditor);
+    // 注册文档变更监听器
+    const changeActiveEditorDisposable = vscode.window.onDidChangeActiveTextEditor(editor => onChangedActiveTextEditor(editor, context));
+    context.subscriptions.push(changeActiveEditorDisposable);
+
+    // 立即开始监视当前活动编辑器
+    onChangedActiveTextEditor(vscode.window.activeTextEditor, context);
 }
 
-export function watchEditorsForSwanLabUsage(): IDisposable {
-    // Process currently active text editor
-    onChangedActiveTextEditor(vscode.window.activeTextEditor);
-    // Process changes to active text editor as well
-    return vscode.window.onDidChangeActiveTextEditor(onChangedActiveTextEditor);
-}
-
-function onChangedActiveTextEditor(editor: vscode.TextEditor | undefined): void {
+function onChangedActiveTextEditor(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext): void {
     if (!editor || !editor.document) {
         return;
     }
     const { document } = editor;
     const extName = path.extname(document.fileName).toLowerCase();
     if (extName === '.py' || (extName === '.ipynb' && document.languageId === 'python')) {
+        let swanlabImportFound = false;
+
         for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber += 1) {
             const line = document.lineAt(lineNumber);
             if (line.text.includes('import swanlab')) {
-                // 触发效果
-                // 这里可以添加你想要的效果，例如显示提示或执行某些操作
-                vscode.window.showInformationMessage('检测到 SwanLab 导入');
+                swanlabImportFound = true;
+                break;
             }
         }
+
+        vscode.commands.executeCommand('setContext', 'swanlabImportDetected', swanlabImportFound);
+    }
+}// 新增 SwanLabCodeLensProvider 类
+class SwanLabCodeLensProvider implements vscode.CodeLensProvider {
+    provideCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
+        const codeLenses: vscode.CodeLens[] = [];
+        for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
+            const line = document.lineAt(lineNumber);
+            if (line.text.includes('import swanlab')) {
+                const codeLens = new vscode.CodeLens(new vscode.Range(lineNumber, 0, lineNumber, 0), {
+                    title: '▶ 启动 SwanLab 会话',
+                    command: 'swanlab.openWebview'
+                });
+                codeLenses.push(codeLens);
+                break; // 只添加一个 CodeLens
+            }
+        }
+        return codeLenses;
     }
 }
 
 function openSwanLabWebsite(context: vscode.ExtensionContext) {
     const panel = vscode.window.createWebviewPanel(
         'swanlabWebview',
-        'SwanLab 网站',
+        'SwanLab',
         vscode.ViewColumn.One,
         {
             enableScripts: true,
