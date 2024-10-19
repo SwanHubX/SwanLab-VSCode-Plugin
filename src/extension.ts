@@ -1,72 +1,93 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
-// This method is called when your extension is activated
+// 当你的扩展被激活时调用此方法
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Congratulations, your extension "swanlab" is now active!');
+    console.log('恭喜，你的扩展 "swanlab" 现在已激活！');
 
-    // Register the command to open SwanLab with options
+    // 注册打开 SwanLab 的命令面板（带选项）
     const disposable = vscode.commands.registerCommand('swanlab.openWebview', async () => {
-        // Present options to the user
-        const option = await vscode.window.showQuickPick(['Open Cloud SwanLab', 'Open Local SwanLab'], {
-            placeHolder: 'Choose how to launch SwanLab'
+        // 向用户呈现选项
+        const option = await vscode.window.showQuickPick(['打开云端 SwanLab', '打开本地 SwanLab'], {
+            placeHolder: '选择如何启动 SwanLab'
         });
 
-        if (option === 'Open Local SwanLab') {
+        if (option === '打开本地 SwanLab') {
+            // 打开一个对话框，让用户选择 SwanLab 日志目录
             const selectedFolder = await vscode.window.showOpenDialog({
-                canSelectFiles: false,
-                canSelectFolders: true,
-                canSelectMany: false,
-                openLabel: 'Select SwanLab Log Directory'
+                canSelectFiles: false,  // 不能选择文件
+                canSelectFolders: true, // 可以选择文件夹
+                canSelectMany: false,  // 不能选择多个文件夹
+                openLabel: '选择 SwanLab 日志目录'
             });
 
             if (selectedFolder && selectedFolder[0]) {
                 openLocalSwanLab(context, selectedFolder[0].fsPath);
             }
-        } else if (option === 'Open Cloud SwanLab') {
-            // Handle opening Cloud SwanLab
-            // You might want to implement this function
+        } else if (option === '打开云端 SwanLab') {
+            // 打开云端 SwanLab 网页
             openSwanLabWebsite(context);
         }
     });
-
     context.subscriptions.push(disposable);
 
-    // 注册代码操作提供程序
-    const codeActionProvider = vscode.languages.registerCodeActionsProvider(
+    // 全局注册 CodeLens 提供者
+    const codeLensProvider = vscode.languages.registerCodeLensProvider(
         { scheme: 'file', language: 'python' },
-        new SwanLabCodeActionProvider()
+        new SwanLabCodeLensProvider()
     );
-    context.subscriptions.push(codeActionProvider);
+    context.subscriptions.push(codeLensProvider);
+
+    // 注册文档变更监听器
+    const changeActiveEditorDisposable = vscode.window.onDidChangeActiveTextEditor(editor => onChangedActiveTextEditor(editor, context));
+    context.subscriptions.push(changeActiveEditorDisposable);
+
+    // 立即开始监视当前活动编辑器
+    onChangedActiveTextEditor(vscode.window.activeTextEditor, context);
 }
 
-// SwanLab代码操作提供程序类
-class SwanLabCodeActionProvider implements vscode.CodeActionProvider {
-    // 提供代码操作的方法
-    provideCodeActions(document: vscode.TextDocument, range: vscode.Range): vscode.CodeAction[] {
-        // 获取当前行的文本
-        const lineText = document.lineAt(range.start.line).text;
-        // 如果当前行包含'import swanlab'
-        if (lineText.includes('import swanlab')) {
-            // 创建一个新的代码操作
-            const action = new vscode.CodeAction('启动 SwanLab', vscode.CodeActionKind.QuickFix);
-            // 设置代码操作的命令
-            action.command = {
-                command: 'swanlab.openWebview',
-                title: '启动 SwanLab',
-                tooltip: '打开 SwanLab 界面'
-            };
-            // 返回包含这个操作的数组
-            return [action];
+function onChangedActiveTextEditor(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext): void {
+    if (!editor || !editor.document) {
+        return;
+    }
+    const { document } = editor;
+    const extName = path.extname(document.fileName).toLowerCase();
+    if (extName === '.py' || (extName === '.ipynb' && document.languageId === 'python')) {
+        let swanlabImportFound = false;
+
+        for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber += 1) {
+            const line = document.lineAt(lineNumber);
+            if (line.text.includes('import swanlab')) {
+                swanlabImportFound = true;
+                break;
+            }
         }
-        // 如果不包含'import swanlab'，返回空数组
-        return [];
+
+        vscode.commands.executeCommand('setContext', 'swanlabImportDetected', swanlabImportFound);
+    }
+}// 新增 SwanLabCodeLensProvider 类
+class SwanLabCodeLensProvider implements vscode.CodeLensProvider {
+    provideCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
+        const codeLenses: vscode.CodeLens[] = [];
+        for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
+            const line = document.lineAt(lineNumber);
+            if (line.text.includes('import swanlab')) {
+                const codeLens = new vscode.CodeLens(new vscode.Range(lineNumber, 0, lineNumber, 0), {
+                    title: '▶ 启动 SwanLab 会话',
+                    command: 'swanlab.openWebview'
+                });
+                codeLenses.push(codeLens);
+                break; // 只添加一个 CodeLens
+            }
+        }
+        return codeLenses;
     }
 }
 
 function openSwanLabWebsite(context: vscode.ExtensionContext) {
     const panel = vscode.window.createWebviewPanel(
         'swanlabWebview',
-        'SwanLab Website',
+        'SwanLab',
         vscode.ViewColumn.One,
         {
             enableScripts: true,
@@ -76,7 +97,7 @@ function openSwanLabWebsite(context: vscode.ExtensionContext) {
 
     panel.webview.html = getWebviewContent('https://swanlab.cn');
 
-    // Handle messages from the webview
+    // 处理来自 webview 的消息
     panel.webview.onDidReceiveMessage(
         message => {
             switch (message.command) {
@@ -93,7 +114,7 @@ function openSwanLabWebsite(context: vscode.ExtensionContext) {
 // 打开本地 SwanLab
 async function openLocalSwanLab(context: vscode.ExtensionContext, logPath: string | undefined) {
     if (!logPath) {
-        vscode.window.showErrorMessage('No valid directory selected for SwanLab logs.');
+        vscode.window.showErrorMessage('未选择有效的 SwanLab 日志目录。');
         return;
     }
     
@@ -101,17 +122,17 @@ async function openLocalSwanLab(context: vscode.ExtensionContext, logPath: strin
     terminal.sendText(`swanlab watch "${logPath}" -p 50092`);
     terminal.show();
 
-    vscode.window.showInformationMessage(`Starting SwanLab with logs from: ${logPath}`);
+    vscode.window.showInformationMessage(`正在启动 SwanLab，日志路径：${logPath}`);
 
-    // Wait for the backend service to start
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 5 seconds
+    // 等待后端服务启动
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 等待 5 秒
 
-    vscode.window.showInformationMessage(`SwanLab backend service is ready. Opening interface...`);
+    vscode.window.showInformationMessage(`SwanLab 后端服务已就绪。正在打开界面...`);
 
-    // Open a new tab in VSCode with the SwanLab interface
+    // 在 VSCode 中打开一个新标签页，显示 SwanLab 界面
     const panel = vscode.window.createWebviewPanel(
         'swanlabLocal',
-        'Local SwanLab',
+        '本地 SwanLab',
         vscode.ViewColumn.One,
         {
             enableScripts: true,
@@ -258,7 +279,7 @@ function getWebviewContent(url: string) {
                     toggleButton.textContent = isHeaderExpanded ? 'Hide Header' : 'Show Header';
                 }
 
-                // Initialize with 90% zoom
+                // 初始化为 90% 缩放
                 changeZoom(0.9);
             </script>
         </body>
@@ -266,5 +287,5 @@ function getWebviewContent(url: string) {
     `;
 }
 
-// This method is called when your extension is deactivated
+// 当你的扩展被停用时调用此方法
 export function deactivate() {}
