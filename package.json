@@ -3,7 +3,7 @@
   "icon": "resources/icon.png",
   "displayName": "SwanLab",
   "description": "SwanLab official VSCode extension, tracking and visualizing your entire machine learning process.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.43.0"
   },
