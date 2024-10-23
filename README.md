@@ -2,6 +2,8 @@
 
 官网：https://swanlab.cn
 
+[English](README_EN.md) | 中文
+
 ## 功能
 
 ![](resources/ui.png)
