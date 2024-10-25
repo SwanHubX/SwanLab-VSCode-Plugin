@@ -8,9 +8,6 @@
     "vscode": "^1.43.0"
   },
   "publisher": "SwanLab",
-  "categories": [
-    "Other"
-  ],
   "repository": {
     "url": "https://github.com/SwanHubX/SwanLab-VSCode-Plugin"
   },
@@ -18,23 +15,24 @@
   "activationEvents": [
     "onLanguage:python"
   ],
+  "l10n": "./l10n",
+  "keywords": [
+    "jupyter",
+    "multi-root ready",
+    "python"
+  ],
+  "categories": [
+    "Data Science",
+    "Machine Learning",
+    "Notebooks"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
+        "category": "Python",
         "command": "swanlab.openWebview",
-        "title": "Python: Launch SwanLab"
-      }
-    ],
-    "localizations": [
-      {
-        "languageId": "zh-cn",
-        "translations": [
-          {
-            "id": "SwanLab.swanlab",
-            "path": "./package.nls.zh-cn.json"
-          }
-        ]
+        "title": "%swanlab.openWebview.title%"
       }
     ]
   },
@@ -63,6 +61,10 @@
     "esbuild": "^0.24.0",
     "eslint": "^9.11.1",
     "npm-run-all": "^4.1.5",
-    "typescript": "^5.6.3"
-  }
+    "typescript": "^5.6.3",
+    "@vscode/l10n-dev": "^0.0.18"
+  },
+  "dependencies": {
+    "@vscode/l10n": "^0.0.10"
+  }   
 }

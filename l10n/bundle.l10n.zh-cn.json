@@ -1,0 +1,12 @@
+{
+  "Congratulations, your extension \"swanlab\" is now active!": "恭喜，您的扩展 \"swanlab\" 现在已激活！",
+  "Open SwanLab in Cloud": "在云端打开 SwanLab",
+  "Open SwanLab Locally": "在本地打开 SwanLab",
+  "Choose how to launch SwanLab": "选择如何启动 SwanLab",
+  "Select SwanLab Log Directory": "选择 SwanLab 日志目录",
+  "No valid SwanLab log directory selected.": "未选择有效的 SwanLab 日志目录。",
+  "Starting SwanLab, log path: {0}": "正在启动 SwanLab，日志路径：{0}",
+  "SwanLab backend service is ready. Opening interface...": "SwanLab 后端服务已就绪。正在打开界面...",
+  "Local SwanLab": "本地 SwanLab",
+  "▶ Start SwanLab Session": "▶ 启动 SwanLab 会话"
+}
