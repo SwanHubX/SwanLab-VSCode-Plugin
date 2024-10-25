@@ -6,11 +6,13 @@
 
 ## 功能
 
-![](resources/ui.png)
+![alt text](resources/plugin.png)
 
 SwanLab 是一款开源、轻量的 AI 实验跟踪工具，提供了一个跟踪、比较、和协作实验的平台。
 
 SwanLab 提供了友好的 API 和漂亮的界面，结合了超参数跟踪、指标记录、在线协作、实验链接分享等功能，让您可以快速跟踪 AI 实验、可视化过程、记录超参数，并分享给伙伴。
+
+![alt text](resources/plugin-code.png)
 
 本插件是由SwanLab团队官方维护的VSCode插件，能够实现：
 
@@ -19,6 +21,7 @@ SwanLab 提供了友好的 API 和漂亮的界面，结合了超参数跟踪、�
 
 ## 更新日志
 
+- `v1.0.4`: 适配多语言
 - `v1.0.3`: 增加了对 swanlab 代码的检测，增加了 CodeLens 功能
 - `v1.0.2`: 增加了顶部控制条，增加页面缩放和刷新功能
 - `v1.0.1`: 初始版本

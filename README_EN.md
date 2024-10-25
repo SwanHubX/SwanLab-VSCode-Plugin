@@ -6,11 +6,13 @@ English | [中文](README.md)
 
 ## Features
 
-![](resources/ui.png)
+![alt text](resources/plugin.png)
 
 SwanLab is an open-source, lightweight AI experiment tracking tool that provides a platform for tracking, comparing, and collaborating on experiments.
 
 SwanLab offers a user-friendly API and a beautiful interface, combining features such as hyperparameter tracking, metrics logging, online collaboration, and experiment link sharing, allowing you to quickly track AI experiments, visualize processes, record hyperparameters, and share them with your peers.
+
+![alt text](resources/plugin-code.png)
 
 This plugin is an officially maintained VSCode extension by the SwanLab team, which enables:
 
@@ -19,6 +21,7 @@ This plugin is an officially maintained VSCode extension by the SwanLab team, wh
 
 ## Changelog
 
+- `v1.0.4`: Added support for multiple languages
 - `v1.0.3`: Added detection for swanlab code and introduced CodeLens feature
 - `v1.0.2`: Added a top control bar, zooming, and refresh functionality
 - `v1.0.1`: Initial version
